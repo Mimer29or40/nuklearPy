@@ -14,6 +14,7 @@ __all__ = (
     "__url__",
     "__download_url__",
     "__project_urls__",
+    "__copyright__",
     "__data_dir__",
 )
 
