@@ -995,6 +995,7 @@ PluginCopy = ctypes.CFUNCTYPE(None, Handle, ctypes.c_char_p, ctypes.c_int)
 PluginCopy.PluginCopy = Callable[[Handle.Handle, int, int], None]
 
 
+# noinspection PyRedeclaration
 class Allocator(ctypes.Structure):
     """
     Wrapper for:
@@ -1032,3 +1033,125 @@ class SymbolType(CEnum):
     SYMBOL_PLUS = _nk.NK_SYMBOL_PLUS
     SYMBOL_MINUS = _nk.NK_SYMBOL_MINUS
     SYMBOL_MAX = _nk.NK_SYMBOL_MAX
+
+
+# ==============================================================================
+#
+#                                    CONTEXT
+#
+# ==============================================================================
+
+_nk.nk_init_default.restype = Bool
+_nk.nk_init_default.argtypes = [ctypes.POINTER(Context),
+                                ctypes.POINTER(UserFont)]
+
+
+def init_default(ctx: Context, font: UserFont) -> bool:
+    """
+    Initializes a `Context` struct with a default standard library allocator.
+    Should be used if you don't want to be bothered with memory management in nuklear.
+    Wrapper for:
+        nk_bool nk_init_default(struct nk_context*, const struct nk_user_font*);
+    """
+    return _nk.nk_init_default(ctx, font)
+
+
+_nk.nk_init_fixed.restype = Bool
+_nk.nk_init_fixed.argtypes = [ctypes.POINTER(Context),
+                              ctypes.c_void_p,
+                              Size,
+                              ctypes.POINTER(UserFont)]
+
+
+def init_fixed(ctx: Context, memory: int, size: int, font: UserFont) -> bool:
+    """
+    Initializes a `Context` struct from single fixed size memory block
+    Should be used if you want complete control over nuklear's memory management.
+    Especially recommended for system with little memory or systems with virtual memory.
+    For the later case you can just allocate for example 16MB of virtual memory
+    and only the required amount of memory will actually be committed.
+    Wrapper for:
+        nk_bool nk_init_fixed(struct nk_context*, void *memory, nk_size size, const struct nk_user_font*);
+    """
+    memory_ptr = ctypes.c_void_p(memory)
+    size_value = ctypes.c_int(size)
+    return _nk.nk_init_fixed(ctx, memory_ptr, size_value, font)
+
+
+_nk.nk_init.restype = Bool
+_nk.nk_init.argtypes = [ctypes.POINTER(Context),
+                        ctypes.POINTER(Allocator),
+                        ctypes.POINTER(UserFont)]
+
+
+def init(ctx: Context, alloc: Allocator, font: UserFont) -> bool:
+    """
+    Initializes a `Context` struct with memory allocation callbacks for nuklear to allocate
+    memory from. Used internally for `init_default` and provides a kitchen sink allocation
+    interface to nuklear. Can be useful for cases like monitoring memory consumption.
+    Wrapper for:
+        nk_bool nk_init(struct nk_context*, struct nk_allocator*, const struct nk_user_font*);
+    """
+    return _nk.nk_init(ctx, alloc, font)
+
+
+_nk.nk_init_custom.restype = Bool
+_nk.nk_init_custom.argtypes = [ctypes.POINTER(Context),
+                               ctypes.POINTER(Buffer),
+                               ctypes.POINTER(Buffer),
+                               ctypes.POINTER(UserFont)]
+
+
+def init_custom(ctx: Context, cmds: Buffer, pool: Buffer, font: UserFont) -> bool:
+    """
+    Initializes a `Context` struct from two different either fixed or growing
+    buffers. The first buffer is for allocating draw commands while the second buffer is
+    used for allocating windows, panels and state tables.
+    Wrapper for:
+        nk_bool nk_init_custom(struct nk_context*, struct nk_buffer *cmds, struct nk_buffer *pool, const struct nk_user_font*);
+    """
+    return _nk.nk_init_custom(ctx, cmds, pool, font)
+
+
+_nk.nk_clear.restype = None
+_nk.nk_clear.argtypes = [ctypes.POINTER(Context)]
+
+
+def clear(ctx: Context) -> None:
+    """
+    Resets the context state at the end of the frame. This includes mostly
+    garbage collector tasks like removing windows or table not called and therefore
+    used anymore.
+    Wrapper for:
+        void nk_clear(struct nk_context*);
+    """
+    _nk.nk_clear(ctx)
+
+
+_nk.nk_free.restype = None
+_nk.nk_free.argtypes = [ctypes.POINTER(Context)]
+
+
+def free(ctx: Context) -> None:
+    """
+    Frees all memory allocated by nuklear. Not needed if context was
+    initialized with `init_fixed`.
+    Wrapper for:
+        void nk_free(struct nk_context*);
+    """
+    _nk.nk_free(ctx)
+
+
+_nk.nk_set_user_data.restype = None
+_nk.nk_set_user_data.argtypes = [ctypes.POINTER(Context),
+                                 Handle]
+
+
+def set_user_data(ctx: Context, handle: Handle) -> None:
+    """
+    Frees all memory allocated by nuklear. Not needed if context was
+    initialized with `init_fixed`.
+    Wrapper for:
+        void nk_set_user_data(struct nk_context*, nk_handle handle);
+    """
+    _nk.nk_set_user_data(ctx, handle)
