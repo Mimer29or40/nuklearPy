@@ -16,7 +16,7 @@ class MyTestCase(unittest.TestCase):
         self.assertIsNotNone(nuklear.__download_url__, "Package Download URL is None")
         self.assertIsNotNone(nuklear.__project_urls__, "Package Version is None")
         self.assertIsNotNone(nuklear.__copyright__, "Package Version is None")
-        self.assertIsNotNone(nuklear.__data_dir__, "Package Version is None")
+        self.assertIsNotNone(nuklear.__bin_dir__, "Package Version is None")
 
 
 if __name__ == "__main__":

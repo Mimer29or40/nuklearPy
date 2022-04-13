@@ -1,4 +1,4 @@
-recursive-include src/nuklear/data *
+recursive-include src/nuklear/bin *
 recursive-exclude test *
 recursive-exclude .idea *
 recursive-exclude docs *

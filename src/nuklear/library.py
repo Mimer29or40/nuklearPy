@@ -9,10 +9,11 @@ import subprocess
 import sys
 import textwrap
 from pathlib import Path
+from typing import Optional
 
 
 def _find_library_candidates(
-    library_names, library_file_extensions, library_search_paths
+        library_names, library_file_extensions, library_search_paths
 ):
     """
     Finds and returns filenames which might be the library you are looking for.
@@ -27,14 +28,14 @@ def _find_library_candidates(
                     continue
                 basename = os.path.basename(filename)
                 if basename.startswith("lib" + library_name):
-                    basename_end = basename[len("lib" + library_name) :]
+                    basename_end = basename[len("lib" + library_name):]
                 elif basename.startswith(library_name):
-                    basename_end = basename[len(library_name) :]
+                    basename_end = basename[len(library_name):]
                 else:
                     continue
                 for file_extension in library_file_extensions:
                     if basename_end.startswith(file_extension):
-                        if basename_end[len(file_extension) :][:1] in ("", "."):
+                        if basename_end[len(file_extension):][:1] in ("", "."):
                             candidates.add(filename)
                     if basename_end.endswith(file_extension):
                         basename_middle = basename_end[: -len(file_extension)]
@@ -44,7 +45,7 @@ def _find_library_candidates(
 
 
 def _load_library(
-    library_names, library_file_extensions, library_search_paths, version_check_callback
+        library_names, library_file_extensions, library_search_paths, version_check_callback
 ):
     """
     Finds, loads and returns the most recent version of the library.
@@ -154,14 +155,13 @@ def _get_library_search_paths():
     return search_paths
 
 
+nuklear: Optional[ctypes.CDLL] = None
 if os.environ.get("NUKLEAR_PY_LIBRARY", ""):
     try:
         nuklear = ctypes.CDLL(os.environ["NUKLEAR_PY_LIBRARY"])
     except OSError:
         nuklear = None
 elif sys.platform == "win32":
-    nuklear = None  # Will become `not None` on success.
-
     # try Windows default search path
     try:
         # TODO - Check for proper name on all dll's
@@ -171,15 +171,15 @@ elif sys.platform == "win32":
 
     # try package directory
     if nuklear is None:
-        dll_dir: Path = (Path(__file__).parent / "dll").resolve()
+        bin_dir: Path = (Path(__file__).parent / "bin").resolve()
         try:
-            if sys.maxsize > 2**32:
+            if sys.maxsize > 2 ** 32:
                 # load Microsoft Visual C++ 2012 runtime on 64-bit systems
-                msvcr = ctypes.CDLL(str(dll_dir / "msvcr110.dll"))
+                msvcr = ctypes.CDLL(str(bin_dir / "msvcr110.dll"))
             else:
                 # load Microsoft Visual C++ 2010 runtime on 32-bit systems
-                msvcr = ctypes.CDLL(str(dll_dir / "msvcr100.dll"))
-            nuklear = ctypes.CDLL(str(dll_dir / "nuklear.dll"))
+                msvcr = ctypes.CDLL(str(bin_dir / "msvcr100.dll"))
+            nuklear = ctypes.CDLL(str(bin_dir / "nuklear.dll"))
         except OSError:
             pass
 
@@ -187,7 +187,7 @@ elif sys.platform == "win32":
     if nuklear is None:
         try:
             nuklear = ctypes.CDLL(
-                os.path.join(sys.prefix, "Library", "bin", "nuklear.dll")
+                str(Path(sys.prefix) / "Library" / "bin" / "nuklear.dll")
             )
         except OSError:
             pass
@@ -200,6 +200,7 @@ else:
     )
 
 
+# noinspection PyTypeChecker
 class EnumerationType(type(ctypes.c_uint)):
     def __new__(cls, name, bases, dict):
         if "_members_" not in dict:
@@ -222,6 +223,7 @@ class EnumerationType(type(ctypes.c_uint)):
         return f"<Enumeration {self.__name__}>"
 
 
+# noinspection PyUnresolvedReferences
 class CEnum(ctypes.c_uint, metaclass=EnumerationType):
     _members_ = {}
 
