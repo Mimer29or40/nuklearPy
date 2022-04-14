@@ -2,18 +2,26 @@
 Python bindings for Nuklear.
 """
 
+from __future__ import annotations
+
 import ctypes
 import glob
 import os
 import subprocess
 import sys
 import textwrap
+from abc import ABC
+from abc import abstractmethod
+from dataclasses import astuple
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Type, TypeVar
+
+from nuklear import metadata
 
 
 def _find_library_candidates(
-        library_names, library_file_extensions, library_search_paths
+    library_names, library_file_extensions, library_search_paths
 ):
     """
     Finds and returns filenames which might be the library you are looking for.
@@ -28,14 +36,14 @@ def _find_library_candidates(
                     continue
                 basename = os.path.basename(filename)
                 if basename.startswith("lib" + library_name):
-                    basename_end = basename[len("lib" + library_name):]
+                    basename_end = basename[len("lib" + library_name) :]
                 elif basename.startswith(library_name):
-                    basename_end = basename[len(library_name):]
+                    basename_end = basename[len(library_name) :]
                 else:
                     continue
                 for file_extension in library_file_extensions:
                     if basename_end.startswith(file_extension):
-                        if basename_end[len(file_extension):][:1] in ("", "."):
+                        if basename_end[len(file_extension) :][:1] in ("", "."):
                             candidates.add(filename)
                     if basename_end.endswith(file_extension):
                         basename_middle = basename_end[: -len(file_extension)]
@@ -45,7 +53,7 @@ def _find_library_candidates(
 
 
 def _load_library(
-        library_names, library_file_extensions, library_search_paths, version_check_callback
+    library_names, library_file_extensions, library_search_paths, version_check_callback
 ):
     """
     Finds, loads and returns the most recent version of the library.
@@ -171,15 +179,14 @@ elif sys.platform == "win32":
 
     # try package directory
     if nuklear is None:
-        bin_dir: Path = (Path(__file__).parent / "bin").resolve()
         try:
-            if sys.maxsize > 2 ** 32:
+            if sys.maxsize > 2**32:
                 # load Microsoft Visual C++ 2012 runtime on 64-bit systems
-                msvcr = ctypes.CDLL(str(bin_dir / "msvcr110.dll"))
+                msvcr = ctypes.CDLL(str(metadata.__bin_dir__ / "msvcr110.dll"))
             else:
                 # load Microsoft Visual C++ 2010 runtime on 32-bit systems
-                msvcr = ctypes.CDLL(str(bin_dir / "msvcr100.dll"))
-            nuklear = ctypes.CDLL(str(bin_dir / "nuklear.dll"))
+                msvcr = ctypes.CDLL(str(metadata.__bin_dir__ / "msvcr100.dll"))
+            nuklear = ctypes.CDLL(str(metadata.__bin_dir__ / "nuklear.dll"))
         except OSError:
             pass
 
@@ -239,3 +246,31 @@ class CEnum(ctypes.c_uint, metaclass=EnumerationType):
             return self.value == other
 
         return type(self) == type(other) and self.value == other.value
+
+
+T = TypeVar("T", bound="StructWrapper")
+
+
+@dataclass
+class StructWrapper(ABC):
+    def __iter__(self):
+        return iter(astuple(self))
+
+    @abstractmethod
+    def to_c(self) -> T.Struct:
+        ...
+
+    @classmethod
+    @abstractmethod
+    def from_c(cls, color: T.Struct) -> T:
+        ...
+
+
+def c_func(c_func, arg_types, return_type):
+    c_func.argtypes = arg_types
+    c_func.restype = return_type
+
+    def wrapper(func):
+        return func
+
+    return wrapper
