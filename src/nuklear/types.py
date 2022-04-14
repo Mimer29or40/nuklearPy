@@ -66,12 +66,12 @@ class Color(StructWrapper):
     a: int = 0
 
     class Struct(StructWrapper.Struct):
-        _fields_ = [
+        _fields_ = (
             ("r", Byte),
             ("g", Byte),
             ("b", Byte),
             ("a", Byte),
-        ]
+        )
         __slots__ = ("r", "g", "b", "a")
 
         def __init__(self):
@@ -109,12 +109,12 @@ class Colorf(StructWrapper):
     a: float = 0.0
 
     class Struct(StructWrapper.Struct):
-        _fields_ = [
+        _fields_ = (
             ("r", ctypes.c_float),
             ("g", ctypes.c_float),
             ("b", ctypes.c_float),
             ("a", ctypes.c_float),
-        ]
+        )
         __slots__ = ("r", "g", "b", "a")
 
         def __init__(self):
@@ -150,10 +150,10 @@ class Vec2(StructWrapper):
     y: float = 0.0
 
     class Struct(StructWrapper.Struct):
-        _fields_ = [
+        _fields_ = (
             ("x", ctypes.c_float),
             ("y", ctypes.c_float),
-        ]
+        )
         __slots__ = ("x", "y")
 
         def __init__(self):
@@ -185,10 +185,10 @@ class Vec2i(StructWrapper):
     y: int = 0
 
     class Struct(StructWrapper.Struct):
-        _fields_ = [
+        _fields_ = (
             ("x", ctypes.c_short),
             ("y", ctypes.c_short),
-        ]
+        )
         __slots__ = ("x", "y")
 
         def __init__(self):
@@ -222,12 +222,12 @@ class Rect(StructWrapper):
     h: float = 0.0
 
     class Struct(StructWrapper.Struct):
-        _fields_ = [
+        _fields_ = (
             ("x", ctypes.c_float),
             ("y", ctypes.c_float),
             ("w", ctypes.c_float),
             ("h", ctypes.c_float),
-        ]
+        )
         __slots__ = ("x", "y", "w", "h")
 
         def __init__(self):
@@ -265,12 +265,12 @@ class Recti(StructWrapper):
     h: int = 0
 
     class Struct(StructWrapper.Struct):
-        _fields_ = [
+        _fields_ = (
             ("x", ctypes.c_short),
             ("y", ctypes.c_short),
             ("w", ctypes.c_short),
             ("h", ctypes.c_short),
-        ]
+        )
         __slots__ = ("x", "y", "w", "h")
 
         def __init__(self):
@@ -301,7 +301,7 @@ class Glyph(StructWrapper.Struct):
         typedef char nk_glyph[NK_UTF_SIZE];
     """
 
-    _fields_ = [("dummy", ctypes.c_char * UTF_SIZE)]
+    _fields_ = (("dummy", ctypes.c_char * UTF_SIZE),)
 
 
 @dataclass(eq=True, order=True)
@@ -315,10 +315,10 @@ class Handle(StructWrapper):
     id: int = 0
 
     class Struct(StructWrapper.Struct):
-        _fields_ = [
+        _fields_ = (
             ("ptr", ctypes.c_void_p),
             ("id", ctypes.c_int),
-        ]
+        )
         __slots__ = ("ptr", "id")
 
         def __init__(self):
@@ -353,12 +353,12 @@ class Image(StructWrapper):
     region: List[int] = field(default_factory=lambda: [0, 0, 0, 0])
 
     class Struct(StructWrapper.Struct):
-        _fields_ = [
+        _fields_ = (
             ("handle", Handle.Struct),
             ("w", UShort),
             ("h", UShort),
             ("region", UShort * 4),
-        ]
+        )
         __slots__ = ("handle", "w", "h", "region")
 
         def __init__(self):
@@ -400,13 +400,13 @@ class NineSlice(StructWrapper):
     b: int = 0
 
     class Struct(StructWrapper.Struct):
-        _fields_ = [
+        _fields_ = (
             ("img", Image.Struct),
             ("l", UShort),
             ("t", UShort),
             ("r", UShort),
             ("b", UShort),
-        ]
+        )
         __slots__ = ("img", "l", "t", "r", "b")
 
         def __init__(self):
@@ -446,11 +446,11 @@ class Cursor(StructWrapper):
     offset: Vec2 = field(default_factory=Vec2)
 
     class Struct(StructWrapper.Struct):
-        _fields_ = [
+        _fields_ = (
             ("img", Image.Struct),
             ("size", Vec2.Struct),
             ("offset", Vec2.Struct),
-        ]
+        )
 
         def __init__(self):
             super().__init__()
@@ -486,10 +486,10 @@ class Scroll(StructWrapper):
     y: int = 0
 
     class Struct(StructWrapper.Struct):
-        _fields_ = [
+        _fields_ = (
             ("x", UInt),
             ("y", UInt),
-        ]
+        )
 
         def __init__(self):
             super().__init__()
@@ -597,11 +597,11 @@ class Allocator(StructWrapper):
     free: Optional[PluginFree] = None
 
     class Struct(StructWrapper.Struct):
-        _fields_ = [
+        _fields_ = (
             ("userdata", Handle.Struct),
             ("alloc", PluginAlloc.CFunc),
             ("free", PluginFree.CFunc),
-        ]
+        )
 
         def __init__(self):
             super().__init__()
