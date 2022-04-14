@@ -267,7 +267,6 @@ if os.environ.get("NUKLEAR_PY_LIBRARY", ""):
 elif sys.platform == "win32":
     # try Windows default search path
     try:
-        # TODO - Check for proper name on all dll's
         nuklear = ctypes.CDLL("nuklear.dll")
     except OSError:
         pass
@@ -275,12 +274,6 @@ elif sys.platform == "win32":
     # try package directory
     if nuklear is None:
         try:
-            if sys.maxsize > 2**32:
-                # load Microsoft Visual C++ 2012 runtime on 64-bit systems
-                msvcr = ctypes.CDLL(str(metadata.__bin_dir__ / "msvcr110.dll"))
-            else:
-                # load Microsoft Visual C++ 2010 runtime on 32-bit systems
-                msvcr = ctypes.CDLL(str(metadata.__bin_dir__ / "msvcr100.dll"))
             nuklear = ctypes.CDLL(str(metadata.__bin_dir__ / "nuklear.dll"))
         except OSError:
             pass
