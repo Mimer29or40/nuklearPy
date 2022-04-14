@@ -15,7 +15,7 @@ from abc import abstractmethod
 from dataclasses import astuple
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Type, TypeVar
+from typing import Callable, Optional, Type, TypeVar, Union
 
 from nuklear import metadata
 
@@ -163,6 +163,101 @@ def _get_library_search_paths():
     return search_paths
 
 
+# noinspection PyTypeChecker
+class EnumerationType(type(ctypes.c_uint)):
+    def __new__(cls, name, bases, dict):
+        if "_members_" not in dict:
+            _members_ = {}
+            for key, value in dict.items():
+                if not key.startswith("_"):
+                    _members_[key] = value
+
+            dict["_members_"] = _members_
+        else:
+            _members_ = dict["_members_"]
+
+        dict["_reverse_map_"] = {v: k for k, v in _members_.items()}
+        cls = type(ctypes.c_uint).__new__(cls, name, bases, dict)
+        for key, value in cls._members_.items():
+            globals()[key] = value
+        return cls
+
+    def __repr__(self):
+        return f"<Enumeration {self.__name__}>"
+
+    def __iter__(self):
+        return iter(self._members_.values())
+
+    def __len__(self):
+        return len(self._members_)
+
+
+# noinspection PyUnresolvedReferences
+class CEnum(ctypes.c_uint, metaclass=EnumerationType):
+    def __repr__(self):
+        value = self.value
+        return (
+            f"<{self.__class__.__name__}."
+            f"{self._reverse_map_.get(value, '(unknown)')}: {value:d}>"
+        )
+
+    def __eq__(self, other):
+        if isinstance(other, int):
+            return self.value == other
+
+        return type(self) == type(other) and self.value == other.value
+
+
+T = TypeVar("T", bound="StructWrapper")
+
+
+@dataclass
+class StructWrapper(ABC):
+    def __iter__(self):
+        return iter(astuple(self))
+
+    def __len__(self):
+        return len(astuple(self))
+
+    @abstractmethod
+    def to_c(self) -> T.Struct:
+        ...
+
+    @classmethod
+    @abstractmethod
+    def from_c(cls, color: T.Struct) -> T:
+        ...
+
+
+# Python 3 compatibility:
+# try:
+#     _getcwd = os.getcwdu
+# except AttributeError:
+#     _getcwd = os.getcwd
+if sys.version_info.major > 2:
+
+    def to_char_p(s):
+        return s.encode("utf-8")
+
+    def from_char_p(b):
+        return b.decode()
+
+    def _reraise(exception, traceback):
+        raise exception.with_traceback(traceback)
+
+else:
+
+    def to_char_p(s):
+        return s
+
+    def from_char_p(b):
+        return b
+
+    def _reraise(exception, traceback):
+        # wrapped in exec, as python 3 does not support this variant of raise
+        exec("raise exception, None, traceback")
+
+
 nuklear: Optional[ctypes.CDLL] = None
 if os.environ.get("NUKLEAR_PY_LIBRARY", ""):
     try:
@@ -206,71 +301,22 @@ else:
         _nuklear_get_version,
     )
 
-
-# noinspection PyTypeChecker
-class EnumerationType(type(ctypes.c_uint)):
-    def __new__(cls, name, bases, dict):
-        if "_members_" not in dict:
-            _members_ = {}
-            for key, value in dict.items():
-                if not key.startswith("_"):
-                    _members_[key] = value
-
-            dict["_members_"] = _members_
-        else:
-            _members_ = dict["_members_"]
-
-        dict["_reverse_map_"] = {v: k for k, v in _members_.items()}
-        cls = type(ctypes.c_uint).__new__(cls, name, bases, dict)
-        for key, value in cls._members_.items():
-            globals()[key] = value
-        return cls
-
-    def __repr__(self):
-        return f"<Enumeration {self.__name__}>"
+if nuklear is None:
+    raise ImportError("Failed to load Nuklear shared library.")
 
 
-# noinspection PyUnresolvedReferences
-class CEnum(ctypes.c_uint, metaclass=EnumerationType):
-    _members_ = {}
+# By default, pyGLFW will only provide functionality from released GLFW
+# versions, as using the development version may lead to changing behavior or
+# missing functions. If the environment variable PYGLFW_PREVIEW is set or the
+# glfw_preview package can be imported, macros and functions from the current
+# developtment version of GLFW will be provided. Note that there will still be
+# a delay between them getting added to GLFW and being wrapped by pyGLFW, and
+# further delay until they are included in a pyGLFW release.
+_PREVIEW = bool(os.environ.get("NUKLEAR_PY_PREVIEW", False))
+if _PREVIEW is None:
+    try:
+        import nuklear_preview
 
-    def __repr__(self):
-        value = self.value
-        return (
-            f"<{self.__class__.__name__}."
-            f"{self._reverse_map_.get(value, '(unknown)')}: {value:d}>"
-        )
-
-    def __eq__(self, other):
-        if isinstance(other, int):
-            return self.value == other
-
-        return type(self) == type(other) and self.value == other.value
-
-
-T = TypeVar("T", bound="StructWrapper")
-
-
-@dataclass
-class StructWrapper(ABC):
-    def __iter__(self):
-        return iter(astuple(self))
-
-    @abstractmethod
-    def to_c(self) -> T.Struct:
-        ...
-
-    @classmethod
-    @abstractmethod
-    def from_c(cls, color: T.Struct) -> T:
-        ...
-
-
-def c_func(c_func, arg_types, return_type):
-    c_func.argtypes = arg_types
-    c_func.restype = return_type
-
-    def wrapper(func):
-        return func
-
-    return wrapper
+        _PREVIEW = True
+    except ImportError:
+        _PREVIEW = False

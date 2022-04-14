@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from dataclasses import field
 from typing import Callable, List, Optional
 
-from nuklear import CEnum
+from nuklear.library import CEnum
 from nuklear.library import StructWrapper
 
 # ==============================================================
@@ -29,12 +29,12 @@ SCROLLBAR_HIDING_TIMEOUT = 4.0
 # ==============================================================================
 
 Char = ctypes.c_int8
-uChar = ctypes.c_uint8
+UChar = ctypes.c_uint8
 Byte = ctypes.c_uint8
 Short = ctypes.c_int16
-uShort = ctypes.c_uint16
+UShort = ctypes.c_uint16
 Int = ctypes.c_int32
-uInt = ctypes.c_uint32
+UInt = ctypes.c_uint32
 Size = ctypes.c_size_t
 Ptr = ctypes.c_void_p
 Bool = ctypes.c_bool
@@ -59,6 +59,7 @@ class Color(StructWrapper):
     Wrapper for:
         struct nk_color {nk_byte r,g,b,a;};
     """
+
     r: int = 0
     g: int = 0
     b: int = 0
@@ -101,6 +102,7 @@ class Colorf(StructWrapper):
     Wrapper for:
         struct nk_colorf {float r,g,b,a;};
     """
+
     r: float = 0.0
     g: float = 0.0
     b: float = 0.0
@@ -143,6 +145,7 @@ class Vec2(StructWrapper):
     Wrapper for:
         struct nk_vec2 {float x,y;};
     """
+
     x: float = 0.0
     y: float = 0.0
 
@@ -177,6 +180,7 @@ class Vec2i(StructWrapper):
     Wrapper for:
         struct nk_vec2i {short x,y;};
     """
+
     x: int = 0
     y: int = 0
 
@@ -211,6 +215,7 @@ class Rect(StructWrapper):
     Wrapper for:
         struct nk_rect {float x,y,w,h;};
     """
+
     x: float = 0.0
     y: float = 0.0
     w: float = 0.0
@@ -253,6 +258,7 @@ class Recti(StructWrapper):
     Wrapper for:
         struct nk_recti {short x,y,w,h;};
     """
+
     x: int = 0
     y: int = 0
     w: int = 0
@@ -304,6 +310,7 @@ class Handle(StructWrapper):
     Wrapper for:
         typedef union {void *ptr; int id;} nk_handle;
     """
+
     ptr: int = 0
     id: int = 0
 
@@ -338,6 +345,7 @@ class Image(StructWrapper):
     Wrapper for:
         struct nk_image {nk_handle handle; nk_ushort w, h; nk_ushort region[4];};
     """
+
     handle: Handle = field(default_factory=Handle)
     w: int = 0
     h: int = 0
@@ -347,9 +355,9 @@ class Image(StructWrapper):
     class Struct(ctypes.Structure):
         _fields_ = [
             ("handle", Handle.Struct),
-            ("w", uShort),
-            ("h", uShort),
-            ("region", uShort * 4),
+            ("w", UShort),
+            ("h", UShort),
+            ("region", UShort * 4),
         ]
         __slots__ = ("handle", "w", "h", "region")
 
@@ -358,7 +366,7 @@ class Image(StructWrapper):
             self.handle = Handle.Struct()
             self.w = 0
             self.h = 0
-            self.region = (uShort * 4)()
+            self.region = (UShort * 4)()
 
     def to_c(self) -> Image.Struct:
         """Converts to C struct"""
@@ -384,6 +392,7 @@ class NineSlice(StructWrapper):
     Wrapper for:
         struct nk_nine_slice {struct nk_image img; nk_ushort l, t, r, b;};
     """
+
     img: Image = field(default_factory=Image)
     l: int = 0
     t: int = 0
@@ -393,10 +402,10 @@ class NineSlice(StructWrapper):
     class Struct(ctypes.Structure):
         _fields_ = [
             ("img", Image.Struct),
-            ("l", uShort),
-            ("t", uShort),
-            ("r", uShort),
-            ("b", uShort),
+            ("l", UShort),
+            ("t", UShort),
+            ("r", UShort),
+            ("b", UShort),
         ]
         __slots__ = ("img", "l", "t", "r", "b")
 
@@ -431,6 +440,7 @@ class Cursor(StructWrapper):
     Wrapper for:
         struct nk_cursor {struct nk_image img; struct nk_vec2 size, offset;};
     """
+
     img: Image = field(default_factory=Image)
     size: Vec2 = field(default_factory=Vec2)
     offset: Vec2 = field(default_factory=Vec2)
@@ -471,13 +481,14 @@ class Scroll(StructWrapper):
     Wrapper for:
         struct nk_scroll {nk_uint x, y;};
     """
+
     x: int = 0
     y: int = 0
 
     class Struct(ctypes.Structure):
         _fields_ = [
-            ("x", uInt),
-            ("y", uInt),
+            ("x", UInt),
+            ("y", UInt),
         ]
 
         def __init__(self):
@@ -562,7 +573,9 @@ class TreeType(CEnum):
 
 
 PluginAlloc = Callable[[Handle, int, int], int]
-PluginAlloc.CFunc = ctypes.CFUNCTYPE(ctypes.c_void_p, Handle.Struct, ctypes.c_void_p, Size)
+PluginAlloc.CFunc = ctypes.CFUNCTYPE(
+    ctypes.c_void_p, Handle.Struct, ctypes.c_void_p, Size
+)
 
 PluginFree = Callable[[Handle, int], None]
 PluginFree.CFunc = ctypes.CFUNCTYPE(None, Handle.Struct, ctypes.c_void_p)
@@ -578,6 +591,7 @@ class Allocator(StructWrapper):
             nk_plugin_free free;
         };
     """
+
     userdata: Handle = field(default_factory=Handle)
     alloc: Optional[PluginAlloc] = None
     free: Optional[PluginFree] = None
@@ -586,7 +600,7 @@ class Allocator(StructWrapper):
         _fields_ = [
             ("userdata", Handle.Struct),
             ("alloc", PluginAlloc.CFunc),
-            ("free", PluginFree),
+            ("free", PluginFree.CFunc),
         ]
 
         def __init__(self):

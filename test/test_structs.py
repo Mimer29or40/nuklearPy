@@ -1,6 +1,6 @@
 import unittest
 
-import nuklear
+import nuklear as nk
 from nuklear.types import Color
 
 
@@ -15,6 +15,10 @@ class StructTests(unittest.TestCase):
         __color = Color.from_c(_color)
         print(__color, repr(__color))
         print(__color.r, type(__color.r))
+
+        c = nk.rgb_hex("AABB55")
+        r = nk.color_hex_rgba(c)
+        print(r, type(r))
 
 
 if __name__ == "__main__":
