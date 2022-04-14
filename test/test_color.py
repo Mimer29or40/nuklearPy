@@ -58,7 +58,7 @@ class ColorModule(unittest.TestCase):
         self.assertEqual(color.g, 0)
         self.assertEqual(color.b, 255)
 
-        self.assertRaises(AssertionError, lambda: nk.rgb_fv((1., 2., 3., 4.)))
+        self.assertRaises(AssertionError, lambda: nk.rgb_fv((1.0, 2.0, 3.0, 4.0)))
 
     def test_rgb_cf(self):
         colorf = nk.Colorf(100.0 / 255.0, -0.1, 1.1, 1.0)

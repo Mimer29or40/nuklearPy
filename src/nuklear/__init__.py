@@ -1,7 +1,21 @@
 from __future__ import annotations
 
 from nuklear import color
+from nuklear import metadata
 from nuklear import types
+
+__metadata_version__ = metadata.__metadata_version__
+__title__ = metadata.__title__
+__version__ = metadata.__version__
+__summary__ = metadata.__summary__
+__author__ = metadata.__author__
+__maintainer__ = metadata.__maintainer__
+__license__ = metadata.__license__
+__url__ = metadata.__url__
+__download_url__ = metadata.__download_url__
+__project_urls__ = metadata.__project_urls__
+__copyright__ = metadata.__copyright__
+__bin_dir__ = metadata.__bin_dir__
 
 # ==============================================================
 #

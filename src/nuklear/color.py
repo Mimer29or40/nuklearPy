@@ -614,12 +614,12 @@ def color_hsva_fv(color: Color) -> Tuple[float, float, float, float]:
 
 
 nk.nk_colorf_hsva_f.argtypes = (
-        ctypes.POINTER(ctypes.c_float),
-        ctypes.POINTER(ctypes.c_float),
-        ctypes.POINTER(ctypes.c_float),
-        ctypes.POINTER(ctypes.c_float),
-        Colorf.Struct,
-    )
+    ctypes.POINTER(ctypes.c_float),
+    ctypes.POINTER(ctypes.c_float),
+    ctypes.POINTER(ctypes.c_float),
+    ctypes.POINTER(ctypes.c_float),
+    Colorf.Struct,
+)
 nk.nk_colorf_hsva_f.restype = None
 
 

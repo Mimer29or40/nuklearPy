@@ -1,6 +1,4 @@
-"""
-Python bindings for Nuklear.
-"""
+"""Python bindings for Nuklear"""
 
 from __future__ import annotations
 
@@ -15,7 +13,7 @@ from abc import abstractmethod
 from dataclasses import astuple
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Optional, Type, TypeVar, Union
+from typing import Optional, TypeVar
 
 from nuklear import metadata
 
@@ -23,9 +21,7 @@ from nuklear import metadata
 def _find_library_candidates(
     library_names, library_file_extensions, library_search_paths
 ):
-    """
-    Finds and returns filenames which might be the library you are looking for.
-    """
+    """Finds and returns filenames which might be the library you are looking for."""
     candidates = set()
     for library_name in library_names:
         for search_path in library_search_paths:
@@ -55,9 +51,7 @@ def _find_library_candidates(
 def _load_library(
     library_names, library_file_extensions, library_search_paths, version_check_callback
 ):
-    """
-    Finds, loads and returns the most recent version of the library.
-    """
+    """Finds, loads and returns the most recent version of the library."""
     candidates = _find_library_candidates(
         library_names, library_file_extensions, library_search_paths
     )
@@ -74,17 +68,12 @@ def _load_library(
 
 
 def _nuklear_get_version(filename):
-    """
-    Queries and returns the library version tuple or None by using a
-    subprocess.
-    """
+    """Queries and returns the library version tuple or None by using a subprocess."""
     version_checker_source = '''
         import sys
         import ctypes
         def get_version(library_handle):
-            """
-            Queries and returns the library version tuple or None.
-            """
+            """Queries and returns the library version tuple or None"""
             major_value = ctypes.c_int(0)
             major = ctypes.pointer(major_value)
             minor_value = ctypes.c_int(0)
@@ -209,10 +198,14 @@ class CEnum(ctypes.c_uint, metaclass=EnumerationType):
 
 
 T = TypeVar("T", bound="StructWrapper")
+TS = TypeVar("TS", bound="StructWrapper.Struct")
 
 
 @dataclass
 class StructWrapper(ABC):
+    class Struct(ctypes.Structure):
+        pass
+
     def __iter__(self):
         return iter(astuple(self))
 
@@ -220,12 +213,12 @@ class StructWrapper(ABC):
         return len(astuple(self))
 
     @abstractmethod
-    def to_c(self) -> T.Struct:
+    def to_c(self) -> TS:
         ...
 
     @classmethod
     @abstractmethod
-    def from_c(cls, color: T.Struct) -> T:
+    def from_c(cls, color: TS) -> T:
         ...
 
 

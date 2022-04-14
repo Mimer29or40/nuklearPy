@@ -65,7 +65,7 @@ class Color(StructWrapper):
     b: int = 0
     a: int = 0
 
-    class Struct(ctypes.Structure):
+    class Struct(StructWrapper.Struct):
         _fields_ = [
             ("r", Byte),
             ("g", Byte),
@@ -82,7 +82,7 @@ class Color(StructWrapper):
             self.a = 0
 
     def to_c(self) -> Color.Struct:
-        """Converts to C struct"""
+        """Converts to C struct."""
         struct = Color.Struct()
         struct.r = self.r
         struct.g = self.g
@@ -92,7 +92,7 @@ class Color(StructWrapper):
 
     @classmethod
     def from_c(cls, struct: Color.Struct) -> Color:
-        """Converts from C struct"""
+        """Converts from C struct."""
         return cls(struct.r, struct.g, struct.b, struct.a)
 
 
@@ -108,7 +108,7 @@ class Colorf(StructWrapper):
     b: float = 0.0
     a: float = 0.0
 
-    class Struct(ctypes.Structure):
+    class Struct(StructWrapper.Struct):
         _fields_ = [
             ("r", ctypes.c_float),
             ("g", ctypes.c_float),
@@ -125,7 +125,7 @@ class Colorf(StructWrapper):
             self.a = 0.0
 
     def to_c(self) -> Colorf.Struct:
-        """Converts to C struct"""
+        """Converts to C struct."""
         struct = Colorf.Struct()
         struct.r = self.r
         struct.g = self.g
@@ -135,7 +135,7 @@ class Colorf(StructWrapper):
 
     @classmethod
     def from_c(cls, struct: Colorf.Struct) -> Colorf:
-        """Converts from C struct"""
+        """Converts from C struct."""
         return cls(struct.r, struct.g, struct.b, struct.a)
 
 
@@ -149,7 +149,7 @@ class Vec2(StructWrapper):
     x: float = 0.0
     y: float = 0.0
 
-    class Struct(ctypes.Structure):
+    class Struct(StructWrapper.Struct):
         _fields_ = [
             ("x", ctypes.c_float),
             ("y", ctypes.c_float),
@@ -162,7 +162,7 @@ class Vec2(StructWrapper):
             self.y = 0.0
 
     def to_c(self) -> Vec2.Struct:
-        """Converts to C struct"""
+        """Converts to C struct."""
         struct = Vec2.Struct()
         struct.x = self.x
         struct.y = self.y
@@ -170,7 +170,7 @@ class Vec2(StructWrapper):
 
     @classmethod
     def from_c(cls, struct: Vec2.Struct) -> Vec2:
-        """Converts from C struct"""
+        """Converts from C struct."""
         return cls(struct.x, struct.y)
 
 
@@ -184,7 +184,7 @@ class Vec2i(StructWrapper):
     x: int = 0
     y: int = 0
 
-    class Struct(ctypes.Structure):
+    class Struct(StructWrapper.Struct):
         _fields_ = [
             ("x", ctypes.c_short),
             ("y", ctypes.c_short),
@@ -197,7 +197,7 @@ class Vec2i(StructWrapper):
             self.y = 0
 
     def to_c(self) -> Vec2i.Struct:
-        """Converts to C struct"""
+        """Converts to C struct."""
         struct = Vec2i.Struct()
         struct.x = self.x
         struct.y = self.y
@@ -205,7 +205,7 @@ class Vec2i(StructWrapper):
 
     @classmethod
     def from_c(cls, struct: Vec2i.Struct) -> Vec2i:
-        """Converts from C struct"""
+        """Converts from C struct."""
         return cls(struct.x, struct.y)
 
 
@@ -221,7 +221,7 @@ class Rect(StructWrapper):
     w: float = 0.0
     h: float = 0.0
 
-    class Struct(ctypes.Structure):
+    class Struct(StructWrapper.Struct):
         _fields_ = [
             ("x", ctypes.c_float),
             ("y", ctypes.c_float),
@@ -238,7 +238,7 @@ class Rect(StructWrapper):
             self.h = 0.0
 
     def to_c(self) -> Rect.Struct:
-        """Converts to C struct"""
+        """Converts to C struct."""
         struct = Rect.Struct()
         struct.x = self.x
         struct.y = self.y
@@ -248,7 +248,7 @@ class Rect(StructWrapper):
 
     @classmethod
     def from_c(cls, struct: Rect.Struct) -> Rect:
-        """Converts from C struct"""
+        """Converts from C struct."""
         return cls(struct.x, struct.y, struct.w, struct.h)
 
 
@@ -264,7 +264,7 @@ class Recti(StructWrapper):
     w: int = 0
     h: int = 0
 
-    class Struct(ctypes.Structure):
+    class Struct(StructWrapper.Struct):
         _fields_ = [
             ("x", ctypes.c_short),
             ("y", ctypes.c_short),
@@ -281,7 +281,7 @@ class Recti(StructWrapper):
             self.h = 0
 
     def to_c(self) -> Recti.Struct:
-        """Converts to C struct"""
+        """Converts to C struct."""
         struct = Recti.Struct()
         struct.x = self.x
         struct.y = self.y
@@ -291,11 +291,11 @@ class Recti(StructWrapper):
 
     @classmethod
     def from_c(cls, struct: Recti.Struct) -> Recti:
-        """Converts from C struct"""
+        """Converts from C struct."""
         return cls(struct.x, struct.y, struct.w, struct.h)
 
 
-class Glyph(ctypes.Structure):
+class Glyph(StructWrapper.Struct):
     """
     Wrapper for:
         typedef char nk_glyph[NK_UTF_SIZE];
@@ -314,7 +314,7 @@ class Handle(StructWrapper):
     ptr: int = 0
     id: int = 0
 
-    class Struct(ctypes.Structure):
+    class Struct(StructWrapper.Struct):
         _fields_ = [
             ("ptr", ctypes.c_void_p),
             ("id", ctypes.c_int),
@@ -327,7 +327,7 @@ class Handle(StructWrapper):
             self.id = 0
 
     def to_c(self) -> Handle.Struct:
-        """Converts to C struct"""
+        """Converts to C struct."""
         struct = Handle.Struct()
         struct.ptr = self.ptr
         struct.id = self.id
@@ -335,7 +335,7 @@ class Handle(StructWrapper):
 
     @classmethod
     def from_c(cls, struct: Handle.Struct) -> Handle:
-        """Converts from C struct"""
+        """Converts from C struct."""
         return cls(struct.ptr, struct.id)
 
 
@@ -352,7 +352,7 @@ class Image(StructWrapper):
     # region: Annotated[List[int], 4] = field(default_factory=lambda: [0, 0, 0, 0])
     region: List[int] = field(default_factory=lambda: [0, 0, 0, 0])
 
-    class Struct(ctypes.Structure):
+    class Struct(StructWrapper.Struct):
         _fields_ = [
             ("handle", Handle.Struct),
             ("w", UShort),
@@ -369,7 +369,7 @@ class Image(StructWrapper):
             self.region = (UShort * 4)()
 
     def to_c(self) -> Image.Struct:
-        """Converts to C struct"""
+        """Converts to C struct."""
         struct = Image.Struct()
         struct.handle = self.handle.to_c()
         struct.w = self.w
@@ -380,7 +380,7 @@ class Image(StructWrapper):
 
     @classmethod
     def from_c(cls, struct: Image.Struct) -> Image:
-        """Converts from C struct"""
+        """Converts from C struct."""
         handle = Handle.from_c(struct.handle)
         region = [int(r) for r in struct.region]
         return cls(handle, struct.w, struct.h, region)
@@ -399,7 +399,7 @@ class NineSlice(StructWrapper):
     r: int = 0
     b: int = 0
 
-    class Struct(ctypes.Structure):
+    class Struct(StructWrapper.Struct):
         _fields_ = [
             ("img", Image.Struct),
             ("l", UShort),
@@ -418,7 +418,7 @@ class NineSlice(StructWrapper):
             self.b = 0
 
     def to_c(self) -> NineSlice.Struct:
-        """Converts to C struct"""
+        """Converts to C struct."""
         struct = NineSlice.Struct()
         struct.img = self.img.to_c()
         struct.l = self.l
@@ -429,7 +429,7 @@ class NineSlice(StructWrapper):
 
     @classmethod
     def from_c(cls, struct: NineSlice.Struct) -> NineSlice:
-        """Converts from C struct"""
+        """Converts from C struct."""
         img = Image.from_c(struct.image)
         return cls(img, struct.l, struct.t, struct.r, struct.b)
 
@@ -445,7 +445,7 @@ class Cursor(StructWrapper):
     size: Vec2 = field(default_factory=Vec2)
     offset: Vec2 = field(default_factory=Vec2)
 
-    class Struct(ctypes.Structure):
+    class Struct(StructWrapper.Struct):
         _fields_ = [
             ("img", Image.Struct),
             ("size", Vec2.Struct),
@@ -459,7 +459,7 @@ class Cursor(StructWrapper):
             self.offset = Vec2.Struct()
 
     def to_c(self) -> Cursor.Struct:
-        """Converts to C struct"""
+        """Converts to C struct."""
         struct = Cursor.Struct()
         struct.img = self.img.to_c()
         struct.size = self.size.to_c()
@@ -468,7 +468,7 @@ class Cursor(StructWrapper):
 
     @classmethod
     def from_c(cls, struct: Cursor.Struct) -> Cursor:
-        """Converts from C struct"""
+        """Converts from C struct."""
         img = Image.from_c(struct.img)
         size = Vec2.from_c(struct.size)
         offset = Vec2.from_c(struct.offset)
@@ -485,7 +485,7 @@ class Scroll(StructWrapper):
     x: int = 0
     y: int = 0
 
-    class Struct(ctypes.Structure):
+    class Struct(StructWrapper.Struct):
         _fields_ = [
             ("x", UInt),
             ("y", UInt),
@@ -497,7 +497,7 @@ class Scroll(StructWrapper):
             self.y = 0
 
     def to_c(self) -> Scroll.Struct:
-        """Converts to C struct"""
+        """Converts to C struct."""
         struct = Scroll.Struct()
         struct.x = self.x
         struct.y = self.y
@@ -505,7 +505,7 @@ class Scroll(StructWrapper):
 
     @classmethod
     def from_c(cls, struct: Scroll.Struct) -> Scroll:
-        """Converts from C struct"""
+        """Converts from C struct."""
         return cls(struct.x, struct.y)
 
 
@@ -596,7 +596,7 @@ class Allocator(StructWrapper):
     alloc: Optional[PluginAlloc] = None
     free: Optional[PluginFree] = None
 
-    class Struct(ctypes.Structure):
+    class Struct(StructWrapper.Struct):
         _fields_ = [
             ("userdata", Handle.Struct),
             ("alloc", PluginAlloc.CFunc),
@@ -610,7 +610,7 @@ class Allocator(StructWrapper):
             self.free = None
 
     def to_c(self) -> Allocator.Struct:
-        """Converts to C struct"""
+        """Converts to C struct."""
         struct = Allocator.Struct()
         struct.userdata = self.userdata.to_c()
         struct.alloc = self.alloc
@@ -619,7 +619,7 @@ class Allocator(StructWrapper):
 
     @classmethod
     def from_c(cls, struct: Allocator.Struct) -> Allocator:
-        """Converts from C struct"""
+        """Converts from C struct."""
         userdata = Handle.from_c(struct.userdata)
         return cls(userdata, struct.alloc, struct.free)
 
@@ -651,7 +651,7 @@ class TextEdit(StructWrapper, ABC):
         struct nk_text_edit;
     """
 
-    class Struct(ctypes.Structure):
+    class Struct(StructWrapper.Struct):
         pass
 
 
